@@ -7,7 +7,14 @@ import { SCHOOL } from '@/lib/constants';
 
 function LoginContent() {
   const sp = useSearchParams();
-  const role = sp.get('role') === 'admin' ? 'admin' : 'guru';
+  const roleParam = sp.get('role');
+
+  const role =
+    roleParam === 'admin'
+      ? 'admin'
+      : roleParam === 'wali_kelas'
+        ? 'wali_kelas'
+        : 'guru_wali';
 
   const [u, setU] = useState('');
   const [p, setP] = useState('');
@@ -35,17 +42,28 @@ function LoginContent() {
       return setE('Username atau password salah.');
     }
 
-    location.href = role === 'admin' ? '/admin' : '/guru';
+    // Arahkan pengguna sesuai jenis akun.
+    if (role === 'admin') {
+      location.href = '/admin';
+    } else {
+      location.href = '/guru';
+    }
   }
 
   return (
     <div className="login">
       <div className="login-card card">
+
+        {/* HEADER LOGIN */}
         <div className="login-hero">
           <div className="logo">7K</div>
 
           <h1>
-            {role === 'admin' ? 'Portal Administrator' : 'Portal Guru'}
+            {role === 'admin'
+              ? 'Portal Administrator'
+              : role === 'wali_kelas'
+                ? 'Portal Wali Kelas'
+                : 'Portal Guru Wali'}
           </h1>
 
           <p className="muted" style={{ fontSize: 13 }}>
@@ -53,52 +71,84 @@ function LoginContent() {
           </p>
         </div>
 
-        <div className="notice" style={{ marginBottom: 18 }}>
+        {/* INFORMASI ROLE */}
+        <div
+          className="notice"
+          style={{ marginBottom: 18 }}
+        >
           {role === 'admin'
             ? 'Kelola seluruh data, akun, dan penugasan kelas.'
-            : 'Pantau rekap kebiasaan siswa sesuai kelas yang ditugaskan.'}
+            : role === 'wali_kelas'
+              ? 'Pantau dan kelola rekap kebiasaan siswa sesuai kelas yang ditugaskan.'
+              : 'Pantau rekap kebiasaan siswa sesuai tugas guru wali.'}
         </div>
 
+        {/* USERNAME */}
         <label>Username</label>
 
         <input
           autoCapitalize="none"
+          autoComplete="username"
           value={u}
           onChange={(x) => setU(x.target.value)}
-          placeholder={role === 'admin' ? 'admin' : 'nama.pengguna'}
+          placeholder={
+            role === 'admin'
+              ? 'admin'
+              : 'nama.pengguna'
+          }
         />
 
+        {/* PASSWORD */}
         <div style={{ marginTop: 14 }}>
           <label>Password</label>
 
           <input
             type="password"
+            autoComplete="current-password"
             value={p}
             onChange={(x) => setP(x.target.value)}
-            onKeyDown={(x) => x.key === 'Enter' && go()}
+            onKeyDown={(x) => {
+              if (x.key === 'Enter') {
+                go();
+              }
+            }}
             placeholder="Masukkan password"
           />
         </div>
 
+        {/* ERROR */}
         {e && (
-          <div className="error" style={{ marginTop: 14 }}>
+          <div
+            className="error"
+            style={{ marginTop: 14 }}
+          >
             {e}
           </div>
         )}
 
+        {/* LOGIN BUTTON */}
         <button
           className="btn primary"
-          style={{ width: '100%', marginTop: 16 }}
+          style={{
+            width: '100%',
+            marginTop: 16,
+          }}
           disabled={loading}
           onClick={go}
         >
-          {loading ? '⏳ Memeriksa...' : '🔐 Masuk ke Dashboard'}
+          {loading
+            ? '⏳ Memeriksa...'
+            : '🔐 Masuk ke Dashboard'}
         </button>
 
+        {/* BACK BUTTON */}
         <a
           href="/"
           className="btn"
-          style={{ width: '100%', marginTop: 9 }}
+          style={{
+            width: '100%',
+            marginTop: 9,
+          }}
         >
           ← Kembali ke Beranda
         </a>
@@ -113,7 +163,9 @@ export default function Login() {
       fallback={
         <div className="login">
           <div className="login-card card">
-            <div className="notice">Memuat halaman login...</div>
+            <div className="notice">
+              Memuat halaman login...
+            </div>
           </div>
         </div>
       }
